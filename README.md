@@ -1,11 +1,12 @@
 ## AI disclaimer
 
-Created with the help of OpenCode, the open source AI coding agent.
+Created with the help of OpenCode, the open source AI coding agent, using Big Pickle (Free) model.
+
 Initial query: `code linear app with tanstack start, clerk, drizzle, and postgres.`
 
-Welcome to your new TanStack Start app!
-
 # Getting Started
+
+Welcome to your new TanStack Start app!
 
 To run this application:
 
