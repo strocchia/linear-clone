@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getProjects, createProject } from "../../server/queries/projects";
 import { Plus, X } from "lucide-react";
 
-export const Route = createFileRoute("/_app/projects")({
+export const Route = createFileRoute("/_app/projects/")({
   component: ProjectsPage,
 });
 

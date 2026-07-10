@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { auth } from "@clerk/tanstack-react-start/server";
+import { auth, clerkClient } from "@clerk/tanstack-react-start/server";
 import { db } from "../db";
 import { projects, users } from "../db-schema";
 import { eq, and, desc } from "drizzle-orm";
@@ -121,14 +121,30 @@ export const ensureUser = createServerFn({ method: "POST" }).handler(
 
     // Clerk provides user data via the session
     // For now insert with placeholder - in production you'd use Clerk's getUser()
+    const client = await clerkClient();
+    const clerkUser = await client.users.getUser(userId);
+
+    const email =
+      clerkUser.emailAddresses.find(
+        (e) => e.id === clerkUser.primaryEmailAddressId,
+      )?.emailAddress ?? "unknown";
+
+    const name =
+      [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
+      clerkUser.username ||
+      "User";
+
+    const avatarUrl = clerkUser.imageUrl || null;
+
     const newUser = {
       id: userId,
-      email: "user@example.com",
-      name: "User",
-      avatarUrl: null as string | null,
+      email,
+      name,
+      avatarUrl,
     };
 
     await db.insert(users).values(newUser).onConflictDoNothing();
+
     return newUser;
   },
 );

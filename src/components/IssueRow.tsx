@@ -34,7 +34,7 @@ export function IssueRow({ issue }: { issue: Issue }) {
       <span className="text-xs text-zinc-500 font-mono whitespace-nowrap">
         {issue.number}
       </span>
-      <span className="flex-1 truncate text-sm text-zinc-200 group-hover:text-zinc-100">
+      <span className="flex-1 pl-2 truncate text-sm text-zinc-200 group-hover:text-zinc-100">
         {issue.title}
       </span>
 

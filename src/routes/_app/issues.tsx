@@ -41,8 +41,8 @@ function IssuesPage() {
       <div className="rounded-lg border border-zinc-800 bg-zinc-900/30">
         {/* Table header */}
         <div className="flex items-center gap-3 border-b border-zinc-800 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-          <div className="w-5" />
-          <div className="w-4" />
+          <div className="w-0" />
+          <div className="w-2" />
           <div className="w-8">ID</div>
           <div className="flex-1">Title</div>
           <div>Labels</div>
@@ -67,16 +67,11 @@ function IssuesPage() {
             </button>
           </div>
         ) : (
-          issues.map((issue) => (
-            <IssueRow key={issue.id} issue={issue} />
-          ))
+          issues.map((issue) => <IssueRow key={issue.id} issue={issue} />)
         )}
       </div>
 
-      <CreateIssueDialog
-        open={showCreate}
-        onOpenChange={setShowCreate}
-      />
+      <CreateIssueDialog open={showCreate} onOpenChange={setShowCreate} />
     </div>
   );
 }

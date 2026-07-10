@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_app/projects/$slug")({
 
 function ProjectDetailPage() {
   const { slug } = Route.useParams();
-  const [view, setView] = useState<"list" | "board">("list");
+  const [view, setView] = useState<"board" | "list">("board");
   const [showCreate, setShowCreate] = useState(false);
   const [, setSelectedIssueId] = useState<string | null>(null);
 
@@ -95,8 +95,8 @@ function ProjectDetailPage() {
         <div className="flex-1 overflow-y-auto">
           <div className="rounded-lg border border-zinc-800 bg-zinc-900/30 mx-6 my-4">
             <div className="flex items-center gap-3 border-b border-zinc-800 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-              <div className="w-5" />
-              <div className="w-4" />
+              <div className="w-0" />
+              <div className="w-2" />
               <div className="w-8">ID</div>
               <div className="flex-1">Title</div>
               <div>Labels</div>

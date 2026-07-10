@@ -1,16 +1,16 @@
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
+import { ensureUser } from "#/server/queries/projects";
 import Sidebar from "../components/Sidebar";
 
 const authCheck = createServerFn({ method: "GET" }).handler(async () => {
   const { userId } = await auth();
   if (!userId) {
-    throw new Response(null, {
-      status: 302,
-      headers: { Location: "/sign-in" },
-    });
+    throw redirect({ to: "/sign-in/$" });
   }
+  // Sync Clerk user data into our database if needed
+  await ensureUser();
   return { userId };
 });
 

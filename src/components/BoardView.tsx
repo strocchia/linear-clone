@@ -20,7 +20,7 @@ export function BoardView({
       {columns.map((col) => (
         <div
           key={col.value}
-          className="flex min-w-[280px] w-[280px] flex-col rounded-lg border border-zinc-800 bg-zinc-900/30"
+          className="flex min-w-1/6 w-1/6 flex-col rounded-lg border border-zinc-800 bg-zinc-900/30"
         >
           {/* Column header */}
           <div className="flex items-center gap-2 border-b border-zinc-800 px-3 py-2.5">
