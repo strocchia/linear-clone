@@ -54,7 +54,11 @@ function RootLayout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen bg-zinc-950 text-zinc-100 font-sans antialiased">
         <QueryClientProvider client={queryClient}>
-          <ClerkProvider>{children}</ClerkProvider>
+          <ClerkProvider
+            publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
+          >
+            {children}
+          </ClerkProvider>
         </QueryClientProvider>
         <Scripts />
       </body>

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { getProjectBySlug } from "../../server/queries/projects";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteProject, getProjectBySlug } from "../../server/queries/projects";
 import { getIssuesByProject } from "../../server/queries/issues";
 import { IssueRow } from "../../components/IssueRow";
 import { BoardView } from "../../components/BoardView";

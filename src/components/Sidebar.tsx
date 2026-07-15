@@ -25,10 +25,14 @@ export default function Sidebar() {
     <aside className="flex h-full w-60 flex-col border-r border-zinc-800 bg-zinc-900/50">
       {/* Header */}
       <div className="flex h-14 items-center gap-2 border-b border-zinc-800 px-3">
-        <div className="flex h-6 w-6 items-center justify-center rounded bg-violet-600 text-[11px] font-bold text-white">
-          L
-        </div>
-        <span className="text-sm font-semibold text-zinc-100">Linear Clone</span>
+        <Link to="/">
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-violet-600 text-[13px] font-bold text-white">
+            L
+          </div>
+        </Link>
+        <span className="text-sm font-semibold text-zinc-100">
+          Linear Clone
+        </span>
         <div className="ml-auto">
           <UserButton
             appearance={{
@@ -67,6 +71,13 @@ export default function Sidebar() {
           />
         </div>
 
+        <SidebarLink
+          to="/projects"
+          icon={<FolderKanban className="h-4 w-4" />}
+          label="All Projects"
+          active={isActive("/projects")}
+        />
+
         {/* Projects */}
         <div className="mt-4">
           <div className="flex items-center justify-between px-2 mb-1">
@@ -86,9 +97,7 @@ export default function Sidebar() {
               key={project.id}
               to="/projects/$slug"
               params={{ slug: project.slug }}
-              icon={
-                <span className="text-sm">{project.icon}</span>
-              }
+              icon={<span className="text-sm">{project.icon}</span>}
               label={project.name}
               active={location.pathname.includes(project.slug)}
             />
@@ -101,12 +110,6 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div className="border-t border-zinc-800 px-2 py-2">
-        <SidebarLink
-          to="/projects"
-          icon={<FolderKanban className="h-4 w-4" />}
-          label="All Projects"
-          active={isActive("/projects")}
-        />
         <SidebarLink
           to="/settings"
           icon={<Settings className="h-4 w-4" />}

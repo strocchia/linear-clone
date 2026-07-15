@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getProjects, createProject } from "../../server/queries/projects";
+import {
+  getProjects,
+  createProject,
+  deleteProject,
+} from "../../server/queries/projects";
 import { Plus, X } from "lucide-react";
 
 export const Route = createFileRoute("/_app/projects/")({
@@ -9,11 +13,19 @@ export const Route = createFileRoute("/_app/projects/")({
 });
 
 function ProjectsPage() {
+  const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: () => getProjects(),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteProject({ data: { id } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
   });
 
   return (
@@ -56,36 +68,54 @@ function ProjectsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
-            <Link
+            <div
+              className="flex flex-col rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:border-zinc-700 hover:bg-zinc-800/30 transition-all"
               key={project.id}
-              to="/projects/$slug"
-              params={{ slug: project.slug }}
-              className="group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:border-zinc-700 hover:bg-zinc-800/30 transition-all"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">{project.icon}</span>
-                <span className="font-medium text-zinc-100 group-hover:text-white">
-                  {project.name}
-                </span>
-              </div>
-              <p className="text-xs text-zinc-500 font-mono mb-2">
-                {project.slug}
-              </p>
-              {project.description && (
-                <p className="text-xs text-zinc-400 line-clamp-2">
-                  {project.description}
+              <Link
+                key={project.id}
+                to="/projects/$slug"
+                params={{ slug: project.slug }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">{project.icon}</span>
+                  <span className="font-medium text-zinc-100 group-hover:text-white">
+                    {project.name}
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-500 font-mono mb-2">
+                  {project.slug}
                 </p>
-              )}
-              <div className="mt-3 flex items-center gap-1.5">
-                <div
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: project.color }}
-                />
-                <span className="text-[10px] text-zinc-600">
-                  Created {new Date(project.createdAt).toLocaleDateString()}
-                </span>
+                {project.description && (
+                  <p className="text-xs text-zinc-400 line-clamp-2">
+                    {project.description}
+                  </p>
+                )}
+                <div className="mt-3 flex items-center gap-1.5">
+                  <div
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: project.color }}
+                  />
+                  <span className="text-[10px] text-zinc-600">
+                    Created {new Date(project.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </Link>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => {
+                    if (
+                      confirm("Are you sure you want to delete this project?")
+                    ) {
+                      deleteMutation.mutate(project.id);
+                    }
+                  }}
+                  className=" text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer"
+                >
+                  X
+                </button>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}
