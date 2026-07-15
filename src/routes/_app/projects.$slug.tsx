@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteProject, getProjectBySlug } from "../../server/queries/projects";
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { getProjectBySlug } from "../../server/queries/projects";
 import { getIssuesByProject } from "../../server/queries/issues";
 import { IssueRow } from "../../components/IssueRow";
 import { BoardView } from "../../components/BoardView";
@@ -16,7 +16,7 @@ function ProjectDetailPage() {
   const { slug } = Route.useParams();
   const [view, setView] = useState<"board" | "list">("board");
   const [showCreate, setShowCreate] = useState(false);
-  const [, setSelectedIssueId] = useState<string | null>(null);
+  const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
 
   const { data: project } = useQuery({
     queryKey: ["project", slug],
@@ -123,6 +123,7 @@ function ProjectDetailPage() {
         <div className="flex-1 overflow-hidden">
           <BoardView
             issues={issues}
+            selectedIssueId={selectedIssueId}
             onIssueClick={(issue) => setSelectedIssueId(issue.id)}
           />
         </div>
