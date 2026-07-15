@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ISSUE_STATUSES } from "../lib/constants";
 import type { Issue } from "../server/db-schema";
-import { deleteIssue } from "#/server/queries/issues";
+import { deleteIssue, moveIssue } from "#/server/queries/issues";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export function BoardView({
   issues,
@@ -22,10 +23,13 @@ export function BoardView({
 
   const queryClient = useQueryClient();
 
-  const [showDelete, setShowDelete] = useState(false);
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteIssue({ data: { id } }),
+  const handleMove = useMutation({
+    mutationFn: (data: {
+      id: string;
+      projectId: string;
+      status:
+        "backlog" | "todo" | "in_progress" | "in_review" | "done" | "cancelled";
+    }) => moveIssue({ data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["issues"] });
     },
@@ -81,36 +85,21 @@ export function BoardView({
                       ))}
                     </div>
                   )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onIssueClick?.(issue);
-                      setShowDelete(true);
-                    }}
-                    className="text-sm text-zinc-500 mt-2 hover:text-zinc-300 transition-colors"
-                  >
-                    Delete
-                  </button>
-                  {showDelete && issue.id === selectedIssueId && (
-                    <div className="relative mt-2">
-                      <button
-                        onClick={() => {
-                          deleteMutation.mutate(issue.id);
-                          setShowDelete(false);
-                        }}
-                        className="rounded px-1 text-xs text-red-500 hover:bg-amber-500 hover:text-zinc-900 transition-colors italic"
-                      >
-                        Confirm
-                      </button>
-                      <span className="mx-2 text-sm">|</span>
-                      <button
-                        onClick={() => setShowDelete(false)}
-                        className="rounded px-1 text-xs text-red-500 hover:bg-amber-500 hover:text-zinc-900 transition-colors italic"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  )}
+                  <IssueMoveButton
+                    issue={issue}
+                    onIssueMove={(data) =>
+                      handleMove.mutate({
+                        id: data.id,
+                        projectId: data.projectId,
+                        status: data.status,
+                      })
+                    }
+                  />
+                  <IssueButtons
+                    issue={issue}
+                    selectedIssueId={selectedIssueId}
+                    onIssueClick={onIssueClick}
+                  />
                 </div>
               </>
             ))}
@@ -120,3 +109,134 @@ export function BoardView({
     </div>
   );
 }
+
+const IssueButtons = ({
+  issue,
+  selectedIssueId,
+  onIssueClick,
+}: {
+  issue: Issue;
+  selectedIssueId?: string;
+  onIssueClick?: (issue: Issue) => void;
+}) => {
+  const queryClient = useQueryClient();
+
+  const [showDelete, setShowDelete] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteIssue({ data: { id } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["issues"] });
+    },
+  });
+
+  return (
+    <div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onIssueClick?.(issue);
+          setShowDelete(true);
+        }}
+        className="text-sm text-zinc-500 mt-2 hover:text-zinc-300 transition-colors"
+      >
+        Delete
+      </button>
+      {showDelete && issue.id === selectedIssueId && (
+        <div className="relative mt-2">
+          <button
+            onClick={() => {
+              deleteMutation.mutate(issue.id);
+              setShowDelete(false);
+            }}
+            className="rounded px-1 text-xs text-red-500 hover:bg-amber-500 hover:text-zinc-900 transition-colors italic"
+          >
+            Confirm
+          </button>
+          <span className="mx-2 text-sm">|</span>
+          <button
+            onClick={() => setShowDelete(false)}
+            className="rounded px-1 text-xs text-red-500 hover:bg-amber-500 hover:text-zinc-900 transition-colors italic"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const IssueMoveButton = ({
+  issue,
+  onIssueMove,
+}: {
+  issue: Issue;
+  onIssueMove: (issue: Issue) => void;
+}) => {
+  const nextStatusRight = () => {
+    switch (issue.status) {
+      case "backlog":
+        return "todo";
+      case "todo":
+        return "in_progress";
+      case "in_progress":
+        return "in_review";
+      case "in_review":
+        return "done";
+      case "done":
+        return "cancelled";
+      case "cancelled":
+        return null;
+    }
+  };
+
+  const nextStatusLeft = () => {
+    switch (issue.status) {
+      case "backlog":
+        return null;
+      case "todo":
+        return "backlog";
+      case "in_progress":
+        return "todo";
+      case "in_review":
+        return "in_progress";
+      case "done":
+        return "in_review";
+      case "cancelled":
+        return "done";
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {issue.status !== "backlog" && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onIssueMove?.({
+              ...issue,
+              status: nextStatusLeft() as Issue["status"],
+            });
+          }}
+          className="text-sm text-zinc-500 mt-2 hover:text-zinc-300 transition-colors"
+        >
+          <ArrowLeft />
+        </button>
+      )}
+      {issue.status !== "cancelled" && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onIssueMove?.({
+              ...issue,
+              status: nextStatusRight() as Issue["status"],
+            });
+          }}
+          className="text-sm text-zinc-500 mt-2 hover:text-zinc-300 transition-colors"
+        >
+          <ArrowRight />
+        </button>
+      )}
+    </div>
+  );
+};

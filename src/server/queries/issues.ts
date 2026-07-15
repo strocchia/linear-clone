@@ -37,7 +37,7 @@ export const getAllIssues = createServerFn({ method: "GET" }).handler(
       .from(issues)
       .where(sql`${issues.projectId} IN ${projectIds}`)
       .orderBy(desc(issues.createdAt));
-  }
+  },
 );
 
 export const getIssueById = createServerFn({ method: "GET" })
@@ -61,11 +61,20 @@ export const createIssue = createServerFn({ method: "POST" })
       projectId: z.string(),
       title: z.string().min(1).max(500),
       description: z.string().optional(),
-      status: z.enum(["backlog", "todo", "in_progress", "in_review", "done", "cancelled"]).optional(),
+      status: z
+        .enum([
+          "backlog",
+          "todo",
+          "in_progress",
+          "in_review",
+          "done",
+          "cancelled",
+        ])
+        .optional(),
       priority: z.enum(["urgent", "high", "medium", "low", "none"]).optional(),
       assigneeId: z.string().optional(),
       labels: z.array(z.string()).optional(),
-    })
+    }),
   )
   .handler(async ({ data }) => {
     const { userId } = await auth();
@@ -94,7 +103,12 @@ export const createIssue = createServerFn({ method: "POST" })
       labels: data.labels ?? [],
     });
 
-    return db.select().from(issues).where(eq(issues.id, id)).limit(1).then((r) => r[0]);
+    return db
+      .select()
+      .from(issues)
+      .where(eq(issues.id, id))
+      .limit(1)
+      .then((r) => r[0]);
   });
 
 export const updateIssue = createServerFn({ method: "POST" })
@@ -103,12 +117,21 @@ export const updateIssue = createServerFn({ method: "POST" })
       id: z.string(),
       title: z.string().min(1).max(500).optional(),
       description: z.string().optional(),
-      status: z.enum(["backlog", "todo", "in_progress", "in_review", "done", "cancelled"]).optional(),
+      status: z
+        .enum([
+          "backlog",
+          "todo",
+          "in_progress",
+          "in_review",
+          "done",
+          "cancelled",
+        ])
+        .optional(),
       priority: z.enum(["urgent", "high", "medium", "low", "none"]).optional(),
       assigneeId: z.string().nullable().optional(),
       labels: z.array(z.string()).optional(),
       sortOrder: z.number().optional(),
-    })
+    }),
   )
   .handler(async ({ data }) => {
     const { userId } = await auth();
@@ -126,7 +149,39 @@ export const updateIssue = createServerFn({ method: "POST" })
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(issues.id, id));
 
-    return db.select().from(issues).where(eq(issues.id, id)).limit(1).then((r) => r[0]);
+    return db
+      .select()
+      .from(issues)
+      .where(eq(issues.id, id))
+      .limit(1)
+      .then((r) => r[0]);
+  });
+
+export const moveIssue = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      id: z.string(),
+      projectId: z.string(),
+      status: z
+        .enum([
+          "backlog",
+          "todo",
+          "in_progress",
+          "in_review",
+          "done",
+          "cancelled",
+        ])
+        .optional(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    await db
+      .update(issues)
+      .set({ status: data.status })
+      .where(eq(issues.id, data.id));
   });
 
 export const deleteIssue = createServerFn({ method: "POST" })
@@ -138,27 +193,27 @@ export const deleteIssue = createServerFn({ method: "POST" })
     await db.delete(issues).where(eq(issues.id, data.id));
   });
 
-export const getIssueCountsByProject = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+export const getIssueCountsByProject = createServerFn({
+  method: "GET",
+}).handler(async () => {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
-    const userProjects = await db
-      .select({ id: projects.id })
-      .from(projects)
-      .where(eq(projects.ownerId, userId));
+  const userProjects = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .where(eq(projects.ownerId, userId));
 
-    const projectIds = userProjects.map((p) => p.id);
-    if (projectIds.length === 0) return [];
+  const projectIds = userProjects.map((p) => p.id);
+  if (projectIds.length === 0) return [];
 
-    return db
-      .select({
-        projectId: issues.projectId,
-        status: issues.status,
-        count: count(),
-      })
-      .from(issues)
-      .where(sql`${issues.projectId} IN ${projectIds}`)
-      .groupBy(issues.projectId, issues.status);
-  }
-);
+  return db
+    .select({
+      projectId: issues.projectId,
+      status: issues.status,
+      count: count(),
+    })
+    .from(issues)
+    .where(sql`${issues.projectId} IN ${projectIds}`)
+    .groupBy(issues.projectId, issues.status);
+});
