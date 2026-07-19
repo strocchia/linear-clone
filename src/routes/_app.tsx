@@ -2,7 +2,8 @@ import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 import { ensureUser } from "#/server/queries/projects";
-import Sidebar from "../components/Sidebar";
+import { SidebarProvider, SidebarTrigger } from "#/components/ui/sidebar";
+import AppSidebar from "#/components/AppSidebar";
 
 const authCheck = createServerFn({ method: "GET" }).handler(async () => {
   const { userId } = await auth();
@@ -24,10 +25,20 @@ export const Route = createFileRoute("/_app")({
 function AppLayout() {
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <main className="flex-1 overflow-y-auto">
-        <Outlet />
-      </main>
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": "14rem",
+            "--sidebar-width-mobile": "20rem",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar />
+        <main className="flex-1 overflow-y-auto">
+          <SidebarTrigger />
+          <Outlet />
+        </main>
+      </SidebarProvider>
     </div>
   );
 }

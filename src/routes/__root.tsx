@@ -8,6 +8,7 @@ import { ClerkProvider } from "@clerk/tanstack-react-start";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
+import { TooltipProvider } from "#/components/ui/tooltip";
 
 const queryClient = new QueryClient();
 
@@ -57,7 +58,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
           <ClerkProvider
             publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
           >
-            {children}
+            <TooltipProvider>{children}</TooltipProvider>
           </ClerkProvider>
         </QueryClientProvider>
         <Scripts />

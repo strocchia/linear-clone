@@ -149,14 +149,14 @@ const IssueButtons = ({
               deleteMutation.mutate(issue.id);
               setShowDelete(false);
             }}
-            className="rounded px-1 text-xs text-red-500 hover:bg-amber-500 hover:text-zinc-900 transition-colors italic"
+            className="rounded px-2 py-0.5 text-xs text-red-500 hover:bg-amber-500 hover:text-zinc-900 transition-colors italic"
           >
             Confirm
           </button>
-          <span className="mx-2 text-sm">|</span>
+          {/* <span className="mx-2 text-sm">|</span> */}
           <button
             onClick={() => setShowDelete(false)}
-            className="rounded px-1 text-xs text-red-500 hover:bg-amber-500 hover:text-zinc-900 transition-colors italic"
+            className="rounded px-2 py-0.5 text-xs text-red-500 hover:bg-amber-500 hover:text-zinc-900 transition-colors italic"
           >
             Cancel
           </button>
